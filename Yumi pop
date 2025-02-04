@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Yumi Pop</title>
+  <style>
+    /* Center the canvas on a dark background */
+    body { 
+      background: #222;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    canvas {
+      /* The canvas border is for debugging purposes */
+      border: 2px solid #555;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="800" height="600"></canvas>
+  <script>
+    // ------------------------------------------------------
+    // Global Setup and Asset Loading
+    // ------------------------------------------------------
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Option to change canvas background:
+    // Set to "solid" for a solid color or "image" to use an image.
+    let canvasBackgroundOption = "image";  // Change to "image" to use backgroundImage
+    const backgroundImage = new Image();
+    backgroundImage.src = 'assets/background.png';  // (Optional background image)
+
+    // Game states: "start" (home screen) and "playing" (gameplay)
+    let gameState = "start";
+
+    // Load asset images for player and bubbles
+    const playerImage = new Image();
+    playerImage.src = 'assets/yumi-player.png'; // Use 'yumi-player.jpg' if needed
+    const bubbleImage = new Image();
+    bubbleImage.src = 'assets/yumi-bubble.png'; // Use 'yumi-bubble.jpg' if needed
+
+    // Load images for drop items
+    const goldCoinImage = new Image();
+    goldCoinImage.src = 'assets/gold-coin.png';
+    const speedBoostImage = new Image();
+    speedBoostImage.src = 'assets/speed-boost.png';
+    const extraLifeImage = new Image();
+    extraLifeImage.src = 'assets/extra-life.png';
+    const skullImage = new Image();
+    skullImage.src = 'assets/skull.png';
+
+    // ------------------------------------------------------
+    // Home Screen Background Animation (Animated Bubbles)
+    // ------------------------------------------------------
+    const bgBubbles = [];
+    const NUM_BG_BUBBLES = 10;
+    function initBackgroundBubbles() {
+      bgBubbles.length = 0;
+      for (let i = 0; i < NUM_BG_BUBBLES; i++) {
+        const radius = Math.random() * 20 + 15;
+        bgBubbles.push({
+          x: Math.random() * (canvas.width - 2 * radius) + radius,
+          y: Math.random() * (canvas.height - 2 * radius) + radius,
+          radius: radius,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2
+        });
+      }
+    }
+    initBackgroundBubbles();
+
+    function updateBackgroundBubbles() {
+      bgBubbles.forEach(bubble => {
+        if (bubble.x - bubble.radius <= 0 || bubble.x + bubble.radius >= canvas.width) {
+          bubble.vx = -bubble.vx;
+        }
+        if (bubble.y - bubble.radius <= 0 || bubble.y + bubble.radius >= canvas.height) {
+          bubble.vy = -bubble.vy;
+        }
+        bubble.x += bubble.vx;
+        bubble.y += bubble.vy;
+      });
+    }
+
+    function drawBackgroundBubbles() {
+      bgBubbles.forEach(bubble => {
+        // Here we use the bubbleImage if available, but you can also use a fallback.
+        if (bubbleImage.complete && bubbleImage.naturalWidth > 0) {
+          ctx.drawImage(bubbleImage, bubble.x - bubble.radius, bubble.y - bubble.radius, bubble.radius * 2, bubble.radius * 2);
+        } else {
+          ctx.strokeStyle = 'red';
+          ctx.beginPath();
+          ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      });
+    }
+
+    // ------------------------------------------------------
+    // Game Objects and Variables (Player, Bullets, Bubbles, Drops)
+    // ------------------------------------------------------
+    const player = {
+      x: canvas.width / 2 - 25,
+      y: canvas.height - 70,
+      width: 80,
+      height: 80,
+      speed: 5,
+      speedBoost: 1,      // Multiplier for speed boost; default 1 (no boost)
+      lives: 2            // Player starts with 2 lives (max 4)
+    };
+
+    let score = 0; // For gold coin collection
+
+    const bullets = [];
+    const bubbles = [];
+    const drops = []; // Array for drop items
+
+    // Bubble constructor for gameplay bubbles
+    function Bubble(x, y, radius, vx, vy, level) {
+      this.x = x;
+      this.y = y;
+      this.radius = radius;
+      this.vx = vx;
+      this.vy = vy;
+      this.level = level;
+    }
+
+    // ------------------------------------------------------
+    // Level Management for Gameplay
+    // ------------------------------------------------------
+    let currentLevel = 1;
+    function initLevel(level) {
+      bubbles.length = 0;
+      const numBubbles = level; // Increase the number of bubbles each level
+      for (let i = 0; i < numBubbles; i++) {
+        const radius = 30;
+        const xPos = Math.random() * (canvas.width - 2 * radius) + radius;
+        const bubble = new Bubble(
+          xPos,
+          50,
+          radius,
+          (Math.random() < 0.5 ? -2 : 2),
+          2 + level * 0.5,
+          1
+        );
+        bubbles.push(bubble);
+      }
+    }
+    // Gameplay level will be initialized when starting the game.
+
+    // ------------------------------------------------------
+    // Drop (Item) System
+    // ------------------------------------------------------
+    // Drop types: "gold", "speed", "extraLife", "skull"
+    const dropTypes = ["gold", "speed", "extraLife", "skull"];
+    const dropChance = 0.3; // 30% chance to drop an item when a bubble is popped
+
+    function updateDrops() {
+      for (let i = drops.length - 1; i >= 0; i--) {
+        let drop = drops[i];
+        drop.y += drop.vy;
+        if (drop.y > canvas.height) {
+          drops.splice(i, 1);
+          continue;
+        }
+        // Collision with player
+        if (
+          drop.x > player.x &&
+          drop.x < player.x + player.width &&
+          drop.y > player.y &&
+          drop.y < player.y + player.height
+        ) {
+          applyDrop(drop);
+          drops.splice(i, 1);
+          continue;
+        }
+      }
+    }
+
+    function drawDrops() {
+      drops.forEach(drop => {
+        let img;
+        if (drop.type === "gold") {
+          img = goldCoinImage;
+        } else if (drop.type === "speed") {
+          img = speedBoostImage;
+        } else if (drop.type === "extraLife") {
+          img = extraLifeImage;
+        } else if (drop.type === "skull") {
+          img = skullImage;
+        }
+        if (img && img.complete && img.naturalWidth > 0) {
+          ctx.drawImage(img, drop.x - 10, drop.y - 10, 20, 20);
+        } else {
+          // Fallback: draw a circle with a color based on drop type
+          ctx.fillStyle = (drop.type === "gold") ? "yellow" :
+                          (drop.type === "speed") ? "green" :
+                          (drop.type === "extraLife") ? "blue" : "black";
+          ctx.beginPath();
+          ctx.arc(drop.x, drop.y, 10, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+    }
+
+    function applyDrop(drop) {
+      if (drop.type === "skull") {
+        alert("Bone and skull drop! Instant death!");
+        resetGame();
+        return;
+      } else if (drop.type === "gold") {
+        score += 10;
+      } else if (drop.type === "speed") {
+        player.speedBoost = 1.5;
+        setTimeout(() => { player.speedBoost = 1; }, 5000);
+      } else if (drop.type === "extraLife") {
+        if (player.lives < 4) {
+          player.lives++;
+        }
+      }
+    }
+
+    // ------------------------------------------------------
+    // Input Handling (only active during gameplay)
+    // ------------------------------------------------------
+    document.addEventListener('keydown', function(e) {
+      if (gameState !== "playing") return;
+      if (e.key === 'ArrowLeft' || e.key === 'a') {
+        player.movingLeft = true;
+      }
+      if (e.key === 'ArrowRight' || e.key === 'd') {
+        player.movingRight = true;
+      }
+      if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w') {
+        shoot();
+      }
+      if (e.key.toLowerCase() === 'g') {
+        shootSpear();
+      }
+    });
+    document.addEventListener('keyup', function(e) {
+      if (gameState !== "playing") return;
+      if (e.key === 'ArrowLeft' || e.key === 'a') {
+        player.movingLeft = false;
+      }
+      if (e.key === 'ArrowRight' || e.key === 'd') {
+        player.movingRight = false;
+      }
+    });
+
+    // Normal bullet fired with Space, etc.
+    function shoot() {
+      bullets.push({
+        x: player.x + player.width / 2 - 2.5,
+        y: player.y,
+        width: 5,
+        height: 10,
+        speed: 7,
+        type: "normal"
+      });
+    }
+
+    // Spear/Grapple shot fired with "G" key
+    function shootSpear() {
+      bullets.push({
+        x: player.x + player.width / 2 - 2.5,
+        y: player.y,
+        width: 5,
+        height: 20,  // Longer bullet for spear effect
+        speed: 10,   // Faster speed
+        type: "spear"
+      });
+    }
+
+    // ------------------------------------------------------
+    // Gameplay Update and Draw Functions
+    // ------------------------------------------------------
+    function updateGame() {
+      // Update player movement (considering speed boost)
+      if (player.movingLeft && player.x > 0) {
+        player.x -= player.speed * player.speedBoost;
+      }
+      if (player.movingRight && player.x + player.width < canvas.width) {
+        player.x += player.speed * player.speedBoost;
+      }
+
+      // Update bullets
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        bullets[i].y -= bullets[i].speed;
+        if (bullets[i].y < 0) {
+          bullets.splice(i, 1);
+        }
+      }
+
+      // Update bubbles – now drawn as solid colored circles
+      for (let i = 0; i < bubbles.length; i++) {
+        let b = bubbles[i];
+        if (b.x - b.radius <= 0 || b.x + b.radius >= canvas.width) {
+          b.vx = -b.vx;
+        }
+        if (b.y + b.radius >= canvas.height) {
+          b.vy = -Math.abs(b.vy);
+        } else {
+          b.vy += 0.1;
+        }
+        b.x += b.vx;
+        b.y += b.vy;
+      }
+
+      // Collision: bullets hitting bubbles
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        for (let j = bubbles.length - 1; j >= 0; j--) {
+          let b = bubbles[j];
+          let bullet = bullets[i];
+          let dx = bullet.x - b.x;
+          let dy = bullet.y - b.y;
+          let distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < b.radius) {
+            bullets.splice(i, 1);
+            // Increase drop chance for spear bullets, for example
+            let chance = (bullet.type === "spear") ? dropChance + 0.2 : dropChance;
+            if (Math.random() < chance) {
+              const dropType = dropTypes[Math.floor(Math.random() * dropTypes.length)];
+              drops.push({
+                x: b.x,
+                y: b.y,
+                type: dropType,
+                vy: 2 + Math.random()  // Random falling speed
+              });
+            }
+            // Split bubble if large enough
+            if (b.radius > 15) {
+              let newRadius = b.radius * 0.7;
+              bubbles.push(new Bubble(b.x, b.y, newRadius, -Math.abs(b.vx), b.vy, b.level + 1));
+              bubbles.push(new Bubble(b.x, b.y, newRadius, Math.abs(b.vx), b.vy, b.level + 1));
+            }
+            bubbles.splice(j, 1);
+            break;
+          }
+        }
+      }
+
+      // Update drops
+      updateDrops();
+
+      // Collision: bubbles hitting the player
+      for (let i = 0; i < bubbles.length; i++) {
+        let b = bubbles[i];
+        if (
+          player.x < b.x + b.radius &&
+          player.x + player.width > b.x - b.radius &&
+          player.y < b.y + b.radius &&
+          player.y + player.height > b.y - b.radius
+        ) {
+          resetGame();
+          return;
+        }
+      }
+
+      // Advance to next level if all bubbles are cleared
+      if (bubbles.length === 0) {
+        currentLevel++;
+        initLevel(currentLevel);
+      }
+    }
+
+    function drawGame() {
+      // Draw canvas background
+      if (canvasBackgroundOption === "image" && backgroundImage.complete && backgroundImage.naturalWidth > 0) {
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+      } else {
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      
+      // Draw drops
+      drawDrops();
+
+      // Draw player
+      if (playerImage.complete && playerImage.naturalWidth > 0) {
+        ctx.drawImage(playerImage, player.x, player.y, player.width, player.height);
+      } else {
+        ctx.fillStyle = 'white';
+        ctx.fillRect(player.x, player.y, player.width, player.height);
+      }
+
+      // Draw bullets (different color for spear shots)
+      bullets.forEach(bullet => {
+        if (bullet.type === "spear") {
+          ctx.fillStyle = "silver";
+        } else {
+          ctx.fillStyle = "yellow";
+        }
+        ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+      });
+
+      // Draw bubbles as solid colored circles
+      bubbles.forEach(b => {
+        ctx.fillStyle = "Red";
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Display current level, lives, and score
+      ctx.fillStyle = 'white';
+      ctx.font = "30px Arial";
+      ctx.textAlign = "left";
+      ctx.fillText("Level: " + currentLevel, 10, 30);
+      ctx.fillText("Lives: " + player.lives, 10, 60);
+      ctx.fillText("Score: " + score, 10, 90);
+    }
+
+    // ------------------------------------------------------
+    // Reset Function: Returns to the Home Screen after a Game Over
+    // ------------------------------------------------------
+    function resetGame() {
+      currentLevel = 1;
+      player.x = canvas.width / 2 - 25;
+      player.y = canvas.height - 70;
+      player.movingLeft = false;
+      player.movingRight = false;
+      player.speedBoost = 1;
+      bullets.length = 0;
+      bubbles.length = 0;
+      drops.length = 0;
+      score = 0;
+      gameState = "start";
+      initBackgroundBubbles();
+    }
+
+    // ------------------------------------------------------
+    // Home Screen Drawing and Interaction
+    // ------------------------------------------------------
+    function drawStartScreen() {
+      if (canvasBackgroundOption === "image" && backgroundImage.complete && backgroundImage.naturalWidth > 0) {
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+      } else {
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      updateBackgroundBubbles();
+      drawBackgroundBubbles();
+
+      ctx.textAlign = "center";
+      ctx.font = "60px 'Arial Black', sans-serif";
+      ctx.fillStyle = "lime";
+      ctx.shadowColor = "white";
+      ctx.shadowBlur = 20;
+      ctx.fillText("Yumi Pop", canvas.width / 2, canvas.height / 2 - 100);
+      ctx.shadowBlur = 0;
+
+      ctx.font = "20px Arial";
+      ctx.fillStyle = "white";
+      ctx.fillText("Press the Start button to play", canvas.width / 2, canvas.height / 2 - 40);
+
+      const buttonWidth = 150;
+      const buttonHeight = 50;
+      const buttonX = canvas.width / 2 - buttonWidth / 2;
+      const buttonY = canvas.height / 2;
+      ctx.fillStyle = "lime";
+      ctx.fillRect(buttonX, buttonY, buttonWidth, buttonHeight);
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(buttonX, buttonY, buttonWidth, buttonHeight);
+      ctx.fillStyle = "black";
+      ctx.font = "24px Arial";
+      ctx.textBaseline = "middle";
+      ctx.fillText("Start", canvas.width / 2, buttonY + buttonHeight / 2);
+
+      // Draw sample characters along the bottom
+      const numCharacters = 3;
+      const spacing = canvas.width / (numCharacters + 1);
+      for (let i = 1; i <= numCharacters; i++) {
+        const charX = spacing * i - 25;
+        const charY = canvas.height - 70;
+        if (playerImage.complete && playerImage.naturalWidth > 0) {
+          ctx.drawImage(playerImage, charX, charY, 50, 50);
+        } else {
+          ctx.fillStyle = 'white';
+          ctx.fillRect(charX, charY, 50, 50);
+        }
+      }
+    }
+
+    canvas.addEventListener('click', function(e) {
+      if (gameState === "start") {
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        const buttonWidth = 150;
+        const buttonHeight = 50;
+        const buttonX = canvas.width / 2 - buttonWidth / 2;
+        const buttonY = canvas.height / 2;
+        if (
+          mouseX >= buttonX && mouseX <= buttonX + buttonWidth &&
+          mouseY >= buttonY && mouseY <= buttonY + buttonHeight
+        ) {
+          gameState = "playing";
+          currentLevel = 1;
+          player.x = canvas.width / 2 - 25;
+          player.y = canvas.height - 70;
+          bullets.length = 0;
+          bubbles.length = 0;
+          drops.length = 0;
+          initLevel(currentLevel);
+        }
+      }
+    });
+
+    // ------------------------------------------------------
+    // Main Game Loop
+    // ------------------------------------------------------
+    function gameLoop() {
+      if (gameState === "start") {
+        drawStartScreen();
+      } else if (gameState === "playing") {
+        updateGame();
+        drawGame();
+      }
+      requestAnimationFrame(gameLoop);
+    }
+    gameLoop();
+  </script>
+</body>
+</html>
