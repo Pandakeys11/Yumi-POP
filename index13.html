@@ -1,0 +1,2212 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yumi Pop</title>
+    <!-- Using Press Start 2P for general UI and Sawarabi Mincho for manga-themed text -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Sawarabi+Mincho&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #222;
+            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            overflow: hidden;
+            image-rendering: auto;
+        }
+
+        header, main, aside {
+            display: block;
+        }
+        /* --- Home Screen Styling with Manga Influence --- */
+        #startScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-image: url('assets/images/custom-background.gif');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: cover;
+            border: 4px solid #fff;
+            box-shadow: 0 0 0 8px #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: border 0.5s ease;
+        }
+            /* When a custom background is applied, add a sleek gradient border */
+            #startScreen.custom-bg {
+                border: 5px solid;
+                border-image: linear-gradient(to right, black, silver, white, silver, black) 1;
+            }
+            /* Manga-themed title */
+            #startScreen h1 {
+                font-family: 'Sawarabi Mincho', serif;
+                font-size: 48px;
+                color: #fff;
+                text-shadow: 4px 4px 0 #000;
+                margin-bottom: 20px;
+            }
+
+            #startScreen input[type="text"],
+            #startScreen input[type="file"],
+            #startScreen button {
+                padding: 10px;
+                font-size: 16px;
+                margin: 10px 0;
+                border: 2px solid #fff;
+                background-color: #555;
+                color: #fff;
+                text-shadow: 1px 1px 0 #000;
+                transition: background-color 0.3s ease, transform 0.2s ease;
+            }
+
+                #startScreen input[type="text"]:hover,
+                #startScreen button:hover {
+                    background-color: #777;
+                    transform: scale(1.05);
+                }
+
+            #startScreen button {
+                width: 200px;
+                display: block;
+                cursor: pointer;
+            }
+        /* Start Screen Home Profile Box */
+        #homeProfileBox {
+            width: 80%;
+            background: #444;
+            padding: 5px;
+            border-radius: 5px;
+            text-align: left;
+            border: 2px solid #fff;
+            font-size: 10px;
+            margin: 10px 0;
+        }
+
+            #homeProfileBox .profile {
+                display: flex;
+                align-items: center;
+            }
+
+            #homeProfileBox .profile-info {
+                margin-left: 5px;
+            }
+        /* --- Bonus Game Panel on Home Screen --- */
+        #bonusGameHome {
+            width: 80%;
+            background: #444;
+            padding: 5px;
+            border-radius: 5px;
+            text-align: left;
+            border: 2px solid #fff;
+            font-size: 10px;
+            margin: 10px 0;
+        }
+
+            #bonusGameHome button {
+                width: 200px;
+                display: block;
+                cursor: pointer;
+            }
+        /* --- Main Game UI remains largely unchanged --- */
+        #mainContainer {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100vw;
+            height: 100vh;
+            box-sizing: border-box;
+            display: none;
+            flex-direction: row;
+            gap: 0;
+            padding: 10px;
+        }
+
+        #leftPanel {
+            width: 220px;
+            background: #333;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border: 2px solid #fff;
+            box-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
+        /* (Bonus game panel removed from left panel) */
+        #itemDirectory {
+            background: #444;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+            border: 2px solid #fff;
+            font-size: 10px;
+            margin-top: 10px;
+        }
+
+            #itemDirectory h3 {
+                margin-top: 0;
+            }
+
+        #sidebar {
+            width: 220px;
+            background: #333;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            border: 2px solid #fff;
+            box-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
+
+            #sidebar button {
+                width: 90%;
+                padding: 10px;
+                font-size: 16px;
+                cursor: pointer;
+                border: 2px solid #fff;
+                background-color: #555;
+                color: #fff;
+            }
+            /* Adjust character portrait in sidebar to auto fit */
+            #sidebar img {
+                max-width: 100%;
+                height: auto;
+                border: 2px solid #fff;
+                border-radius: 10px;
+            }
+        /* Backpack UI in sidebar */
+        #backpackContainer {
+            width: 100%;
+            background: #444;
+            padding: 5px;
+            border-radius: 5px;
+            text-align: center;
+            border: 2px solid #fff;
+            font-size: 10px;
+            margin-top: 10px;
+        }
+
+        #backpackGrid {
+            display: grid;
+            grid-template-columns: repeat(3, 50px);
+            grid-template-rows: repeat(3, 50px);
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .backpack-slot {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #555;
+            cursor: pointer;
+            font-size: 24px;
+        }
+
+            .backpack-slot:hover {
+                background-color: #777;
+            }
+        /* In-game Profile Panel */
+        #profileBox {
+            width: 100%;
+            background: #444;
+            padding: 5px;
+            border-radius: 5px;
+            border: 2px solid #fff;
+            font-size: 12px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+            #profileBox .profile {
+                display: flex;
+                align-items: center;
+            }
+
+            #profileBox .profile-info {
+                margin-left: 5px;
+            }
+
+            #profileBox .scoreboard {
+                display: flex;
+                gap: 10px;
+            }
+
+        #gameArea {
+            flex: 1;
+            background: url('assets/images/canvas-background.gif') no-repeat center center;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border: 2px solid #fff;
+            box-shadow: 0 0 10px rgba(0,0,255,0.5);
+            position: relative;
+        }
+
+        #gameCanvas {
+            display: block;
+            margin: 0 auto;
+            border: 6px solid #00f;
+            background-color: #000;
+            box-shadow: 0 0 10px rgba(0,0,255,0.5);
+            image-rendering: pixelated;
+        }
+
+        #settingsOverlay {
+            display: none;
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -20%);
+            background: #444;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 50;
+            width: 300px;
+            text-align: left;
+            border: 4px solid #fff;
+        }
+
+            #settingsOverlay label {
+                display: block;
+                margin-bottom: 10px;
+            }
+
+        #closeSettings {
+            display: block;
+            margin: 10px auto 0;
+            padding: 5px 10px;
+            cursor: pointer;
+            border: 2px solid #fff;
+            background-color: #555;
+            color: #fff;
+        }
+
+        #settingsOverlay input[type="number"] {
+            width: 50px;
+        }
+
+        .animated-border {
+            border: 2px solid transparent;
+            padding: 5px;
+            background-image: linear-gradient(white, white), linear-gradient(90deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            animation: borderPulse 2s infinite;
+        }
+
+        @keyframes borderPulse {
+            0% {
+                filter: hue-rotate(0deg);
+            }
+
+            100% {
+                filter: hue-rotate(360deg);
+            }
+        }
+
+        #gameOverScreen {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #222;
+            color: #fff;
+            padding: 20px;
+            border: 4px solid #fff;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+            display: none;
+            z-index: 100;
+        }
+
+        #roundTransitionOverlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 20;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: #fff;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        /* Coin Panel */
+        #coinPanel {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            border: 2px solid #fff;
+            font-family: 'Press Start 2P', cursive;
+        }
+        /* --- Enhanced Cutscene Overlay --- */
+        #cutscene {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0,0,0,0.9);
+            z-index: 200;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-family: 'Sawarabi Mincho', serif;
+            text-align: center;
+            padding: 20px;
+        }
+        /* Container for each slide */
+        .cutscene-slide {
+            opacity: 1;
+            transition: opacity 1s ease-in-out;
+        }
+
+            .cutscene-slide.fade-out {
+                opacity: 0;
+            }
+
+            .cutscene-slide img {
+                max-width: 80%;
+                max-height: 60%;
+                border: 2px solid #fff;
+                margin-bottom: 20px;
+            }
+
+            .cutscene-slide p {
+                font-size: 24px;
+                margin: 10px 0;
+            }
+        /* Skip button for cutscenes */
+        #skipCutscene {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: 2px solid #fff;
+            background-color: #555;
+            color: #fff;
+            transition: background-color 0.3s ease;
+        }
+
+            #skipCutscene:hover {
+                background-color: #777;
+            }
+    </style>
+</head>
+<body>
+    <!-- Cutscene Container -->
+    <div id="cutscene">
+        <div id="cutsceneContent"></div>
+        <button id="skipCutscene">Skip</button>
+    </div>
+
+    <!-- Home Screen with Manga-styled UI -->
+    <div id="startScreen">
+        <h1>Yumi Pop</h1>
+        <input type="text" id="usernameInput" placeholder="Enter your username" />
+        <label>Upload Profile Image: <input type="file" id="startCustomProfilePic" accept="image/*"></label>
+        <div id="homeProfileBox" class="info-box">
+            <div class="profile">
+                <img id="homeProfilePic" src="assets/images/default-profile.png" alt="Profile Picture" style="width:50px; height:50px; border:2px solid #fff; border-radius:50%;">
+                <div class="profile-info">
+                    <p id="homeProfileUsername">Username: Guest</p>
+                    <p id="homeProfileLevel">Level: 1</p>
+                    <p id="homeProfileTopScore">Top Score: 0</p>
+                </div>
+            </div>
+        </div>
+        <!-- Bonus Game Panel moved to Home Screen -->
+        <div id="bonusGameHome" class="info-box">
+            <h3>Bonus Game</h3>
+            <p>You have <span id="bonusOpportunitiesHome">0</span> play(s) available.</p>
+            <button id="playBonusGameButtonHome" disabled>Play Bonus Game</button>
+        </div>
+        <button id="startButton">Start Game</button>
+        <div id="startError" style="color:red; margin-top:10px;"></div>
+    </div>
+
+    <div id="mainContainer" class="animated-border">
+        <aside id="leftPanel" class="animated-border">
+            <div id="leaderboardContent" class="info-box">
+                <h3>Leaderboard</h3>
+                <!-- Leaderboard entries populated via JS -->
+            </div>
+            <div id="itemDirectory" class="info-box">
+                <h3>Item Directory</h3>
+                <div id="itemDirectoryList"></div>
+            </div>
+        </aside>
+        <main id="gameArea">
+            <canvas id="gameCanvas"></canvas>
+            <div id="gameMessage"></div>
+            <div id="roundTransitionOverlay"></div>
+            <!-- In-game Profile Panel (compact version) -->
+            <div id="profileBox" class="info-box">
+                <div class="profile">
+                    <img id="profilePic" src="assets/images/default-profile.png" alt="Profile Picture" style="width:50px; height:50px; border:2px solid #fff; border-radius:50%;">
+                    <div class="profile-info">
+                        <p id="profileUsername">Username: </p>
+                        <p id="profileLevel">Level: </p>
+                        <p id="profileTopScore">Top Score: </p>
+                    </div>
+                </div>
+                <div class="scoreboard">
+                    <p id="scoreText">Score: 0</p>
+                    <p id="livesText">Lives: 3</p>
+                    <p id="timerDisplay">Time: 0s ⏱️</p>
+                </div>
+            </div>
+        </main>
+        <aside id="sidebar" class="animated-border">
+            <button id="pauseButton">Pause</button>
+            <button id="settingsButton">Settings</button>
+            <button id="restartGameButton">Restart Game</button>
+            <div id="achievementLog">
+                <h4>Achievements</h4>
+            </div>
+            <img src="assets/images/characterPortrait.gif" alt="Character Portrait" />
+            <!-- Backpack UI -->
+            <div id="backpackContainer" class="info-box">
+                <h3>Backpack</h3>
+                <div id="backpackGrid"></div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Coin Panel -->
+    <div id="coinPanel">
+        <span id="coinUsername"></span> | Coins: <span id="coinCount">0</span>
+    </div>
+
+    <div id="gameOverScreen">
+        <h1>Game Over</h1>
+        <p id="finalScore"></p>
+        <h3>Leaderboard</h3>
+        <ul id="gameOverLeaderboard"></ul>
+        <button id="restartButton">Restart Game</button>
+        <button id="homeButton">Home</button>
+    </div>
+
+    <div id="settingsOverlay">
+        <h3>Settings</h3>
+        <label><input type="checkbox" id="bgMusicToggle" checked> Background Music</label>
+        <label><input type="checkbox" id="sfxToggle" checked> Sound Effects</label>
+        <label>Background Music Volume: <input type="range" id="bgVolume" min="0" max="1" step="0.01" value="1"></label>
+        <label>Sound Effects Volume: <input type="range" id="sfxVolume" min="0" max="1" step="0.01" value="1"></label>
+        <!-- Custom Backdrop supports PNG or GIF for both home screen and play area -->
+        <label>Custom Backdrop: <input type="file" id="customBackdrop" accept="image/*"></label>
+        <label>Custom Profile Picture: <input type="file" id="customProfilePic" accept="image/*"></label>
+        <label class="fullScreenToggle"><input type="checkbox" id="fullScreenToggle"> Full Screen Mode</label>
+        <h4>Control Remapping</h4>
+        <label>Move Left: <input type="text" id="keyLeft" value="a" maxlength="1"></label>
+        <label>Move Right: <input type="text" id="keyRight" value="d" maxlength="1"></label>
+        <label>Shoot: <input type="text" id="keyShoot" value=" " maxlength="1"></label>
+        <label>Custom Music: <input type="file" id="customMusic" accept="audio/*"></label>
+        <label>Leaderboard Reset Interval (minutes): <input type="number" id="resetInterval" value="5" min="1" step="1"></label>
+        <button id="closeSettings">Close</button>
+    </div>
+
+    <script>
+    "use strict";
+    document.addEventListener('DOMContentLoaded', function() {
+      const LEFT_PANEL_WIDTH = 220;
+      const RIGHT_PANEL_WIDTH = 220;
+      const HIT_COOLDOWN = 1000;
+      const MAX_LIVES = 5;
+      const AUTO_FIRE_DURATION = 10000;
+      const AUTO_FIRE_INTERVAL_MS = 300;
+      const SHOOT_ANIMATION_DURATION = 300;
+      const BASE_BUBBLE_SPEED = 2.5;
+      const SPEED_INCREASE_PER_LEVEL = 0.15;
+      const MAX_BUBBLE_SPEED = 8;
+      const BOSS_HEALTH_BASE = 3;
+      const GOLDEN_SPAWN_CHANCE = 0.08;
+      const MIN_BUBBLES = 3;
+      const MAX_BUBBLES = 25;
+      const HORIZONTAL_PULL_CHANCE = 0.02;
+      const HORIZONTAL_PULL_STRENGTH = 2;
+      const MIN_HORIZONTAL_VELOCITY = 1.5;
+
+      let autoFireActive = false;
+      let autoFireInterval = null;
+      let roundTransitionInProgress = false;
+      let difficultyFactor = 1.0;
+      let currentDifficulty = "Easy";
+      let gameTime = 0;
+      let timerInterval = null;
+      let coinsCollected = 0;
+      let laserFireActive = false;
+      let laserFireTimeout;
+
+      // Game State Management
+      const GameState = {
+          START: 'start',
+          PLAYING: 'playing',
+          CUTSCENE: 'cutscene',
+          PAUSED: 'paused',
+          GAME_OVER: 'game_over'
+      };
+      let currentState = GameState.START;
+
+      function updateGameState(newState) {
+          currentState = newState;
+          if (currentState === GameState.PLAYING) gameLoop();
+      }
+
+      // Global backpack inventory (max total 9 items; each type up to 3)
+      let backpackInventory = {};
+
+      const assetCache = {};
+      function preloadImage(src) {
+        if (!assetCache[src]) {
+          const img = new Image();
+          img.src = src;
+          assetCache[src] = img;
+        }
+        return assetCache[src];
+      }
+      preloadImage('assets/images/custom-background.gif');
+      preloadImage('assets/images/canvas-background.gif');
+      preloadImage('assets/images/characterPortrait.gif');
+      preloadImage("assets/images/floor.png");
+      preloadImage("assets/images/start_cutscene.png");
+      preloadImage("assets/images/boss_cutscene.png");
+
+      function spritePNG(assetName) {
+        const path = `assets/images/${assetName}.png`;
+        return preloadImage(path);
+      }
+      function sprite(assetName) {
+        const assets = {
+          paddle: { width: 125, height: 25 },
+          bubbleLarge: { width: 75, height: 75 },
+          bubbleMedium: { width: 30, height: 30 },
+          bubbleSmall: { width: 20, height: 20 },
+          tinyBubble: { width: 12, height: 12 },
+          projectile: { width: 2, height: 6 },
+          characterIdle: { width: 75, height: 75 },
+          drop_extraLife: { width: 30, height: 30 },
+          drop_speedBoost: { width: 30, height: 30 },
+          drop_shieldBoost: { width: 30, height: 30 },
+          drop_coins: { width: 30, height: 30 },
+          drop_weapon: { width: 30, height: 30 },
+          drop_slowMotion: { width: 30, height: 30 },
+          drop_spreadShot: { width: 30, height: 30 },
+          clock: { width: 30, height: 30 }
+        };
+        return assets[assetName];
+      }
+      function spriteAnimation(assetName, currentFrame, maxFrames) {
+        const frameIndex = (currentFrame % maxFrames) + 1;
+        const path = `assets/images/${assetName}_${frameIndex}.png`;
+        return preloadImage(path);
+      }
+
+      let canvas, ctx, animationFrame;
+      let username = "";
+      let score = 0, lives = 3, level = 1, combo = 0;
+      let xp = 0, xpLevel = 1, bonusGameOpportunities = 0;
+      let gameObjects = { bubbles: [], projectiles: [], paddle: null, drops: [], particles: [], explosions: [], speechBubbles: [] };
+      const gravity = 0.2;
+      let timeScale = 1.0;
+      let speedBoostActive = false, shieldActive = false, weaponBoostActive = false;
+      let spreadShotActive = false, slowMotionActive = false;
+      let speedBoostTimeout, shieldTimeout, weaponBoostTimeout, spreadShotTimeout, slowMotionTimeout;
+      let paddleInvulnerable = false;
+      let itemLog = [];
+      let shakeTime = 0, shakeIntensity = 0;
+      let bgMusicOn = true, sfxOn = true;
+      let controlLeft = "a", controlRight = "d", controlShoot = " ";
+      let gamePaused = false;
+      let achievements = [];
+      let customBackdropImg = null;
+      let customBackdropIsGif = false;
+
+      // Generate an array of 100 beautiful colors for bubbles using HSL
+      const bubbleColors = [];
+      for (let i = 0; i < 100; i++) {
+        const hue = Math.floor((360 * i) / 100);
+        bubbleColors.push(`hsl(${hue}, 80%, 60%)`);
+      }
+
+      const regularBackdrops = [
+        "assets/images/in-game-backdrop1.png",
+        "assets/images/in-game-backdrop2.png",
+        "assets/images/in-game-backdrop3.png",
+        "assets/images/in-game-backdrop4.png",
+        "assets/images/in-game-backdrop5.png",
+        "assets/images/in-game-backdrop6.png",
+        "assets/images/in-game-backdrop7.png",
+        "assets/images/in-game-backdrop8.png",
+        "assets/images/in-game-backdrop9.png",
+        "assets/images/in-game-backdrop10.png"
+      ];
+      const specialBackdrops = [
+        "assets/images/special-backdrop1.png",
+        "assets/images/special-backdrop2.png",
+        "assets/images/special-backdrop3.png"
+      ];
+      const specialLevels = [10, 15, 20, 25];
+      regularBackdrops.forEach(src => preloadImage(src));
+      specialBackdrops.forEach(src => preloadImage(src));
+
+      // CUSTOM BACKDROP HANDLER: Applies to both the home screen and the game area.
+      document.getElementById("customBackdrop").addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          customBackdropIsGif = file.type === "image/gif";
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            customBackdropImg = new Image();
+            customBackdropImg.src = event.target.result;
+            if (customBackdropIsGif) {
+              const gameArea = document.getElementById("gameArea");
+              gameArea.style.backgroundImage = `url(${customBackdropImg.src})`;
+              gameArea.style.backgroundSize = "cover";
+              gameArea.style.backgroundRepeat = "no-repeat";
+              gameArea.style.backgroundPosition = "center";
+              const startScreen = document.getElementById("startScreen");
+              startScreen.style.backgroundImage = `url(${customBackdropImg.src})`;
+              startScreen.style.backgroundSize = "cover";
+              startScreen.style.backgroundRepeat = "no-repeat";
+              startScreen.style.backgroundPosition = "center";
+              // Add a gradient border to the home screen for custom backdrops.
+              startScreen.classList.add("custom-bg");
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // Custom Profile Picture listeners.
+      document.getElementById("customProfilePic").addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            const newPicSrc = event.target.result;
+            document.getElementById("profilePic").src = newPicSrc;
+            document.getElementById("homeProfilePic").src = newPicSrc;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+      document.getElementById("startCustomProfilePic").addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            const newPicSrc = event.target.result;
+            document.getElementById("homeProfilePic").src = newPicSrc;
+            document.getElementById("profilePic").src = newPicSrc;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      function adjustCanvasSize() {
+        canvas = document.getElementById("gameCanvas");
+        const availableWidth = window.innerWidth - LEFT_PANEL_WIDTH - RIGHT_PANEL_WIDTH - 20;
+        const availableHeight = window.innerHeight - 20;
+        const aspect = 1000 / 600;
+        let newWidth = availableWidth;
+        let newHeight = newWidth / aspect;
+        if (newHeight > availableHeight) {
+          newHeight = availableHeight;
+          newWidth = newHeight * aspect;
+        }
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+        repositionPlayer();
+      }
+      function repositionPlayer() {
+        if (gameObjects.paddle) {
+          const playArea = getPlayArea();
+          const floorHeight = canvas.height * 0.05;
+          const idleImg = spritePNG("characterIdle_1");
+          const idleHeight = idleImg.naturalHeight ? Math.floor(idleImg.naturalHeight * 1.5) : 75;
+          gameObjects.paddle.y = playArea.y + playArea.height - floorHeight - idleHeight;
+        }
+      }
+      window.addEventListener("resize", adjustCanvasSize);
+      document.addEventListener("fullscreenchange", adjustCanvasSize);
+      adjustCanvasSize();
+
+      // Update bonus game UI on home screen.
+      function updateBonusGameUI() {
+        document.getElementById("bonusOpportunitiesHome").innerText = bonusGameOpportunities;
+        document.getElementById("playBonusGameButtonHome").disabled = (bonusGameOpportunities <= 0);
+      }
+
+      function playBonusGame() {
+        if (bonusGameOpportunities <= 0) return;
+        bonusGameOpportunities--;
+        updateBonusGameUI();
+        const outcomes = [0.5, 0.75, 1, 1.25, 1.5];
+        const multiplier = outcomes[Math.floor(Math.random() * outcomes.length)];
+        let bonusMessage = "";
+        if (multiplier > 1) {
+          bonusMessage = `Bonus! Coins increased by ${Math.floor((multiplier - 1) * 100)}%!`;
+        } else if (multiplier < 1) {
+          bonusMessage = `Penalty! Coins decreased by ${Math.floor((1 - multiplier) * 100)}%!`;
+        } else {
+          bonusMessage = `No change in coins.`;
+        }
+        coinsCollected = Math.floor(coinsCollected * multiplier);
+        updateCoinPanel();
+        showGameMessage(bonusMessage);
+      }
+
+      // NEW: Activate drops that are coins or death drops.
+      function activateDrop(drop) {
+        if (drop.type === "coins") {
+          coinsCollected += drop.value;
+          updateCoinPanel();
+          showGameMessage(`Collected ${drop.value} coins!`);
+        } else if (drop.type === "deathDrop") {
+          showGameMessage("Death Drop! Game Over!");
+          endGame();
+        }
+      }
+
+      function updatePlayerRecord() {
+        let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+        const recordIndex = leaderboard.findIndex(entry => entry.username.toLowerCase() === username.toLowerCase());
+        if (recordIndex !== -1) {
+          leaderboard[recordIndex].xp = xp;
+          leaderboard[recordIndex].xpLevel = xpLevel;
+          leaderboard[recordIndex].bonusOpportunities = bonusGameOpportunities;
+          leaderboard[recordIndex].timeSurvived = gameTime;
+          leaderboard[recordIndex].coins = (leaderboard[recordIndex].coins || 0) + coinsCollected;
+          localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+        }
+      }
+      function showGameMessage(message) {
+        const msgDiv = document.getElementById("gameMessage");
+        msgDiv.innerText = message;
+        msgDiv.style.display = "block";
+        setTimeout(() => { msgDiv.style.display = "none"; }, 2000);
+      }
+      function checkLevelUp() {
+        while (xp >= xpLevel * 100) {
+          xp -= xpLevel * 100;
+          xpLevel++;
+          bonusGameOpportunities++;
+          addAchievement("Level Up! Now Player Level " + xpLevel + ". Bonus game available!");
+          updateBonusGameUI();
+          updateProfileBox();
+        }
+      }
+
+      // ----------------- SOUND SETUP -----------------
+      const specialSound = new Audio("assets/sounds/special.wav");
+      const deathSound = new Audio("assets/sounds/death.wav");
+      const bubbleSplitSound = new Audio("assets/sounds/bubbleSplit.wav");
+      const audioPop = new Audio("assets/sounds/pop.wav");
+      const audioPowerup = new Audio("assets/sounds/powerup.wav");
+
+      const bgMusicPlaylist = [
+        "assets/sounds/Backgroundmusic1.wav",
+        "assets/sounds/Backgroundmusic2.wav"
+      ];
+      const bossMusic = "assets/sounds/bossMusic.wav";
+      let currentBgTrack = 0;
+      const bgMusic = new Audio(bgMusicPlaylist[currentBgTrack]);
+      bgMusic.loop = true; // Background music loops continuously
+
+      function stopEffectSounds() {
+        specialSound.pause();
+        specialSound.currentTime = 0;
+        deathSound.pause();
+        deathSound.currentTime = 0;
+        bubbleSplitSound.pause();
+        bubbleSplitSound.currentTime = 0;
+        audioPop.pause();
+        audioPop.currentTime = 0;
+        audioPowerup.pause();
+        audioPowerup.currentTime = 0;
+      }
+
+      let movingWall = { x: 20, y: 200, width: 100, height: 20, dx: 2 };
+      function updateMovingWall(playArea) {
+        if (level % 3 === 0) {
+          movingWall.y = playArea.y + playArea.height / 2;
+          movingWall.x += movingWall.dx * difficultyFactor;
+          if (movingWall.x + movingWall.width >= playArea.x + playArea.width || movingWall.x <= playArea.x) {
+            movingWall.dx = -movingWall.dx;
+          }
+        }
+      }
+      function drawMovingWall(playArea) {
+        if (level % 3 === 0) {
+          ctx.fillStyle = "#880";
+          ctx.fillRect(movingWall.x, movingWall.y, movingWall.width, movingWall.height);
+        }
+      }
+      function getPlayArea() {
+        const margin = 0;
+        return { x: margin, y: margin, width: canvas.width - 2 * margin, height: canvas.height - 2 * margin };
+      }
+      function drawGameBackdrop(playArea) {
+        if (customBackdropImg && customBackdropImg.naturalWidth && !customBackdropIsGif) {
+          ctx.drawImage(customBackdropImg, 0, 0, canvas.width, canvas.height);
+        } else if (!customBackdropImg) {
+          let backdropSrc = specialLevels.includes(level) ?
+            specialBackdrops[Math.floor(Math.random() * specialBackdrops.length)] :
+            regularBackdrops[Math.floor((level - 1) / 3) % regularBackdrops.length];
+          const bgImg = preloadImage(backdropSrc);
+          if (bgImg.naturalWidth) {
+            ctx.drawImage(bgImg, 0, 0, canvas.width, canvas.height);
+          } else {
+            ctx.fillStyle = "#000";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+          }
+        }
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(playArea.x, playArea.y, playArea.width, playArea.height);
+        updateMovingWall(playArea);
+        drawMovingWall(playArea);
+      }
+      function drawFloor(playArea) {
+        const floorHeight = canvas.height * 0.05;
+        const floorImg = preloadImage("assets/images/floor");
+        if (floorImg.naturalWidth) {
+          ctx.drawImage(floorImg, playArea.x, playArea.y + playArea.height - floorHeight, playArea.width, floorHeight);
+        } else {
+          ctx.fillStyle = "#555";
+          ctx.fillRect(playArea.x, playArea.y + playArea.height - floorHeight, playArea.width, floorHeight);
+        }
+      }
+      function drawBoundaries(playArea) {
+        ctx.fillStyle = "#888";
+        ctx.fillRect(playArea.x, playArea.y, playArea.width, 4);
+        ctx.fillRect(playArea.x, playArea.y, 4, playArea.height);
+        ctx.fillRect(playArea.x + playArea.width - 4, playArea.y, 4, playArea.height);
+      }
+      function drawPlayerStats() {
+        ctx.font = "24px 'Sawarabi Mincho', sans-serif";
+        ctx.fillStyle = "#fff";
+        ctx.fillText("Lives: " + lives + "   Score: " + score, 20, 40);
+      }
+      function updateProfileBox() {
+        document.getElementById("profileUsername").innerText = "Username: " + username;
+        document.getElementById("profileLevel").innerText = "Level: " + xpLevel;
+        let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+        let userRecord = leaderboard.find(entry => entry.username.toLowerCase() === username.toLowerCase());
+        let topScore = userRecord ? userRecord.score : score;
+        document.getElementById("profileTopScore").innerText = "Top Score: " + topScore;
+        document.getElementById("scoreText").innerText = "Score: " + score;
+        document.getElementById("livesText").innerText = "Lives: " + lives;
+        document.getElementById("timerDisplay").innerText = "Time: " + gameTime + "s ⏱️";
+      }
+      function updateCoinPanel() {
+        document.getElementById("coinCount").innerText = coinsCollected;
+        document.getElementById("coinUsername").innerText = "Player: " + username;
+      }
+
+      function isCollidingCircleRect(circle, rect) {
+        let closestX = Math.max(rect.x, Math.min(circle.x, rect.x + rect.width));
+        let closestY = Math.max(rect.y, Math.min(circle.y, rect.y + rect.height));
+        let dx = circle.x - closestX;
+        let dy = circle.y - closestY;
+        return (dx * dx + dy * dy) <= (circle.radius * circle.radius);
+      }
+      function isCollidingRect(rect1, rect2) {
+        return (rect1.x < rect2.x + rect2.width &&
+                rect1.x + rect1.width > rect2.x &&
+                rect1.y < rect2.y + rect2.height &&
+                rect1.y + rect1.height > rect2.y);
+      }
+      function updateDifficultyIndicator() {
+        if (level <= 10) {
+          if (level <= 5) {
+            currentDifficulty = "Easy";
+            difficultyFactor = 1.0;
+          } else {
+            currentDifficulty = "Medium";
+            difficultyFactor = 1.3;
+          }
+        } else if (level <= 20) {
+          currentDifficulty = "Medium";
+          difficultyFactor = 1.3;
+        } else if (level <= 30) {
+          currentDifficulty = "Medium Level 2";
+          difficultyFactor = 1.6;
+        } else {
+          currentDifficulty = "Hard";
+          difficultyFactor = 2.0;
+        }
+      }
+
+      // ----------------- SPRITE CLASSES -----------------
+      class IdleNoActionSprite {
+        constructor(player) {
+          this.player = player;
+          this.frame = 0;
+          this.maxFrames = 6;
+          this.frameDelay = 5;
+          this.frameDelayCounter = 0;
+          const sp = spritePNG("characterIdle_1");
+          this.width = sp.naturalWidth ? Math.floor(sp.naturalWidth * 1.5) : 75;
+          this.height = sp.naturalHeight ? Math.floor(sp.naturalHeight * 1.5) : 75;
+        }
+        draw() {
+          this.frameDelayCounter++;
+          if (this.frameDelayCounter >= this.frameDelay) {
+            this.frame++;
+            this.frameDelayCounter = 0;
+          }
+          const img = spriteAnimation("characterIdle", this.frame, this.maxFrames);
+          if (img.naturalWidth) { ctx.drawImage(img, this.player.x, this.player.y, this.width, this.height); }
+        }
+      }
+      class IdleShootingSprite {
+        constructor(player) {
+          this.player = player;
+          this.frame = 0;
+          this.maxFrames = 6;
+          this.frameDelay = 5;
+          this.frameDelayCounter = 0;
+          const sp = spritePNG("characterIdleShoot_1");
+          this.width = sp.naturalWidth ? Math.floor(sp.naturalWidth * 1.5) : 75;
+          this.height = sp.naturalHeight ? Math.floor(sp.naturalHeight * 1.5) : 75;
+        }
+        draw() {
+          this.frameDelayCounter++;
+          if (this.frameDelayCounter >= this.frameDelay) {
+            this.frame++;
+            this.frameDelayCounter = 0;
+          }
+          const img = spriteAnimation("characterIdleShoot", this.frame, this.maxFrames);
+          if (img.naturalWidth) { ctx.drawImage(img, this.player.x, this.player.y, this.width, this.height); }
+        }
+      }
+      class RunningSprite {
+        constructor(player) {
+          this.player = player;
+          this.frame = 0;
+          this.maxFrames = 6;
+          this.frameDelay = 5;
+          this.frameDelayCounter = 0;
+          const sp = spritePNG("characterRun_1");
+          this.width = sp.naturalWidth ? Math.floor(sp.naturalWidth * 1.5) : 75;
+          this.height = sp.naturalHeight ? Math.floor(sp.naturalHeight * 1.5) : 75;
+        }
+        draw() {
+          this.frameDelayCounter++;
+          if (this.frameDelayCounter >= this.frameDelay) {
+            this.frame++;
+            this.frameDelayCounter = 0;
+          }
+          const img = spriteAnimation("characterRun", this.frame, this.maxFrames);
+          if (img.naturalWidth) {
+            if (this.player.direction === "left") {
+              ctx.save();
+              ctx.translate(this.player.x + this.width / 2, this.player.y);
+              ctx.scale(-1, 1);
+              ctx.drawImage(img, -this.width / 2, 0, this.width, this.height);
+              ctx.restore();
+            } else {
+              ctx.drawImage(img, this.player.x, this.player.y, this.width, this.height);
+            }
+          }
+        }
+      }
+      class RunningShootingSprite {
+        constructor(player) {
+          this.player = player;
+          this.frame = 0;
+          this.maxFrames = 6;
+          this.frameDelay = 5;
+          this.frameDelayCounter = 0;
+          const sp = spritePNG("characterRunShoot_1");
+          this.width = sp.naturalWidth ? Math.floor(sp.naturalWidth * 1.5) : 75;
+          this.height = sp.naturalHeight ? Math.floor(sp.naturalHeight * 1.5) : 75;
+        }
+        draw() {
+          this.frameDelayCounter++;
+          if (this.frameDelayCounter >= this.frameDelay) {
+            this.frame++;
+            this.frameDelayCounter = 0;
+          }
+          const img = spriteAnimation("characterRunShoot", this.frame, this.maxFrames);
+          if (img.naturalWidth) {
+            if (this.player.direction === "left") {
+              ctx.save();
+              ctx.translate(this.player.x + this.width / 2, this.player.y);
+              ctx.scale(-1, 1);
+              ctx.drawImage(img, -this.width / 2, 0, this.width, this.height);
+              ctx.restore();
+            } else {
+              ctx.drawImage(img, this.player.x, this.player.y, this.width, this.height);
+            }
+          }
+        }
+      }
+      class Projectile {
+        constructor(x, y, angle = 0) {
+          this.x = x;
+          this.y = y;
+          this.frame = 0;
+          this.maxFrames = 2;
+          const sp = spritePNG("projectileAnim_1");
+          this.width = sp.naturalWidth ? sp.naturalWidth * 0.5 : 10;
+          this.height = sp.naturalHeight ? sp.naturalHeight * 0.5 : 10;
+          this.speed = 6;
+          this.angle = angle;
+        }
+        draw() {
+          const img = spriteAnimation("projectileAnim", this.frame, this.maxFrames);
+          if (img.naturalWidth) { ctx.drawImage(img, this.x, this.y, this.width, this.height); }
+        }
+        update() {
+          this.frame = (this.frame + 1) % this.maxFrames;
+          this.x += Math.sin(this.angle) * this.speed * timeScale;
+          this.y -= Math.cos(this.angle) * this.speed * timeScale;
+        }
+      }
+      class GrappleLaserProjectile {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.width = 4;
+          this.height = 100;
+          this.speed = 8;
+        }
+        draw() {
+          ctx.fillStyle = "#ff0000";
+          ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+        update() {
+          this.y -= this.speed * timeScale;
+        }
+      }
+      class Bubble {
+        constructor(x, y, radius, dx, dy, size) {
+          this.x = x;
+          this.y = y;
+          this.radius = radius;
+          this.dx = dx * difficultyFactor;
+          this.dy = dy * difficultyFactor;
+          this.size = size;
+          this.frame = 0;
+          this.maxFrames = 1;
+          this.gravityModifier = 0.8 + Math.random() * 0.4;
+          this.bounceFactor = Math.max(0.85 - (level * 0.008 * difficultyFactor), 0.65);
+          this.color = bubbleColors[Math.floor(Math.random() * bubbleColors.length)];
+        }
+        draw() {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.shadowColor = this.color;
+          ctx.shadowBlur = 10;
+          ctx.fill();
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.closePath();
+          ctx.restore();
+        }
+        update() {
+          const levelFactor = 1 + (level - 1) * SPEED_INCREASE_PER_LEVEL * difficultyFactor;
+          this.dy += gravity * this.gravityModifier * timeScale * levelFactor;
+          this.x += this.dx * timeScale * levelFactor;
+          this.y += this.dy * timeScale;
+          if (Math.random() < HORIZONTAL_PULL_CHANCE * difficultyFactor) {
+            const pullStrength = HORIZONTAL_PULL_STRENGTH * (1 + level * 0.05 * difficultyFactor);
+            this.dx += (Math.random() - 0.5) * pullStrength * timeScale;
+            this.dx = Math.max(-MAX_BUBBLE_SPEED, Math.min(MAX_BUBBLE_SPEED, this.dx));
+          }
+          const playArea = getPlayArea();
+          if (this.x + this.radius >= playArea.x + playArea.width) {
+            this.dx = -Math.abs(this.dx * this.bounceFactor) - MIN_HORIZONTAL_VELOCITY;
+            this.x = playArea.x + playArea.width - this.radius;
+          } else if (this.x - this.radius <= playArea.x) {
+            this.dx = Math.abs(this.dx * this.bounceFactor) + MIN_HORIZONTAL_VELOCITY;
+            this.x = playArea.x + this.radius;
+          }
+          if (this.y - this.radius <= playArea.y) {
+            this.dy = -this.dy * this.bounceFactor;
+            this.y = playArea.y + this.radius;
+          }
+          const floorY = playArea.y + playArea.height;
+          if (this.y + this.radius >= floorY) {
+            this.dy = -(8 + level * 0.3) * levelFactor;
+            if (Math.abs(this.dx) < MIN_HORIZONTAL_VELOCITY) {
+              this.dx = (Math.random() < 0.5 ? -1 : 1) *
+                       Math.max(MIN_HORIZONTAL_VELOCITY, Math.min(BASE_BUBBLE_SPEED + level * SPEED_INCREASE_PER_LEVEL * difficultyFactor, MAX_BUBBLE_SPEED));
+            } else {
+              this.dx *= 0.98;
+            }
+            this.y = floorY - this.radius;
+          }
+          if (level % 3 === 0) {
+            if (this.x + this.radius > movingWall.x && this.x - this.radius < movingWall.x + movingWall.width &&
+                this.y + this.radius > movingWall.y && this.y - this.radius < movingWall.y + movingWall.height) {
+              this.dx = -this.dx * 1.2 * difficultyFactor;
+              this.dy = -this.dy * 1.2 * difficultyFactor;
+            }
+          }
+        }
+      }
+      class GoldenBubble extends Bubble {
+        constructor(x, y, dx, dy) {
+          super(x, y, 60, dx, dy, "golden");
+          this.health = Math.max(1, Math.floor(level / 8));
+        }
+        draw() {
+          const img = spritePNG("goldenBubble");
+          if (img.naturalWidth) {
+            ctx.drawImage(img, this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+          } else {
+            ctx.beginPath();
+            ctx.fillStyle = "#ff0";
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.closePath();
+          }
+        }
+        update() {
+          if (level >= 12 && Math.random() < 0.06 * difficultyFactor) {
+            this.dx += (Math.random() - 0.5) * 3 * difficultyFactor;
+            this.dy += (Math.random() - 0.5) * 3 * difficultyFactor;
+          }
+          super.update();
+        }
+      }
+      class BossBubble extends Bubble {
+        constructor(x, y, dx, dy) {
+          super(x, y, 100, dx, dy, "boss");
+          this.health = BOSS_HEALTH_BASE + Math.floor(level / 5);
+          this.gravityModifier = 1.0;
+          this.phase = 1;
+        }
+        draw() {
+          const img = spritePNG("bubbleBoss");
+          if (img.naturalWidth) {
+            ctx.save();
+            // Pulsating effect for boss
+            const scale = 1 + Math.sin(Date.now() * 0.005) * 0.05;
+            ctx.translate(this.x - this.radius * scale, this.y - this.radius * scale);
+            ctx.scale(scale, scale);
+            ctx.drawImage(img, 0, 0, this.radius * 2, this.radius * 2);
+            ctx.restore();
+          } else {
+            ctx.beginPath();
+            ctx.fillStyle = "#f00";
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.closePath();
+          }
+        }
+        update() {
+          if (this.health <= BOSS_HEALTH_BASE / 2 && this.phase === 1) {
+            this.phase = 2;
+            gameObjects.speechBubbles.push(new SpeechBubble(this.x, this.y - 50, "You can't stop me!"));
+            // Spawn mini-bubbles in phase 2
+            for (let i = 0; i < 3; i++) {
+              gameObjects.bubbles.push(new Bubble(
+                this.x, this.y, 20,
+                (Math.random() - 0.5) * 5 * difficultyFactor,
+                -5 * difficultyFactor,
+                "small"
+              ));
+            }
+          }
+          if (level >= 10 && Math.random() < 0.03 * difficultyFactor) {
+            this.dx *= 1.6 * difficultyFactor;
+            this.dy *= 1.6 * difficultyFactor;
+          }
+          super.update();
+        }
+      }
+      class SpeechBubble {
+        constructor(x, y, text) {
+          this.x = x;
+          this.y = y;
+          this.text = text;
+          this.duration = 3000;
+          this.startTime = Date.now();
+        }
+        draw() {
+          if (Date.now() - this.startTime > this.duration) return;
+          ctx.fillStyle = "#fff";
+          ctx.fillRect(this.x - 10, this.y - 40, 150, 30);
+          ctx.strokeStyle = "#000";
+          ctx.strokeRect(this.x - 10, this.y - 40, 150, 30);
+          ctx.fillStyle = "#000";
+          ctx.font = "16px 'Sawarabi Mincho'";
+          ctx.fillText(this.text, this.x, this.y - 20);
+        }
+      }
+      function spawnBubbles(currentLevel) {
+        const playArea = getPlayArea();
+        updateDifficultyIndicator();
+        const baseCount = MIN_BUBBLES + Math.floor(currentLevel * 0.8 * difficultyFactor);
+        const randomVariance = Math.floor(Math.random() * 4) - 2;
+        const bubbleCount = Math.min(baseCount + randomVariance, MAX_BUBBLES);
+        if (currentLevel % 10 === 0) {
+          updateGameState(GameState.CUTSCENE);
+          showCutscene('boss', () => {
+            const x = playArea.x + playArea.width / 2;
+            const y = playArea.y + 30;
+            const dx = (Math.random() < 0.5 ? -1 : 1) * Math.min(BASE_BUBBLE_SPEED + currentLevel * SPEED_INCREASE_PER_LEVEL * difficultyFactor, MAX_BUBBLE_SPEED);
+            const dy = (-4 - currentLevel * 0.4) * difficultyFactor;
+            gameObjects.bubbles.push(new BossBubble(x, y, dx, dy));
+            addAchievement(`Omega Boss Appears at Level ${currentLevel}!`);
+            gameObjects.speechBubbles.push(new SpeechBubble(x, y - 50, "Prepare yourself, Yumi!"));
+            updateGameState(GameState.PLAYING);
+          });
+        } else {
+          if (currentLevel % 5 === 0) {
+            const x = playArea.x + playArea.width / 2;
+            const y = playArea.y + 30;
+            const dx = (Math.random() < 0.5 ? -1 : 1) * Math.min(BASE_BUBBLE_SPEED + currentLevel * SPEED_INCREASE_PER_LEVEL * difficultyFactor, MAX_BUBBLE_SPEED);
+            const dy = (-4 - currentLevel * 0.4) * difficultyFactor;
+            gameObjects.bubbles.push(new BossBubble(x, y, dx, dy));
+          }
+          const largeWeight = Math.max(0.6 - currentLevel * 0.04, 0.2);
+          const mediumWeight = Math.min(0.2 + currentLevel * 0.02, 0.4);
+          const smallWeight = Math.min(0.1 + currentLevel * 0.03, 0.3);
+          const cumulative = largeWeight + mediumWeight + smallWeight;
+          const tinyWeight = 1 - cumulative;
+          for (let i = 0; i < bubbleCount; i++) {
+            const x = playArea.x + 50 + Math.random() * (playArea.width - 100);
+            const y = playArea.y + 50 + Math.random() * ((playArea.height / 2) - 50);
+            const dx = (Math.random() < 0.5 ? -1 : 1) * Math.min(BASE_BUBBLE_SPEED + currentLevel * SPEED_INCREASE_PER_LEVEL * difficultyFactor, MAX_BUBBLE_SPEED);
+            const dy = (-5 - currentLevel * 0.25) * difficultyFactor;
+            const goldenChance = GOLDEN_SPAWN_CHANCE + (currentLevel * 0.01 * difficultyFactor);
+            if (currentLevel >= 4 && Math.random() < goldenChance) {
+              gameObjects.bubbles.push(new GoldenBubble(x, y, dx, dy));
+            } else {
+              const rand = Math.random();
+              let size, radius;
+              if (rand < largeWeight) {
+                size = "large"; radius = 50;
+              } else if (rand < largeWeight + mediumWeight) {
+                size = "medium"; radius = 30;
+              } else if (rand < largeWeight + mediumWeight + smallWeight) {
+                size = "small"; radius = 20;
+              } else {
+                size = "tiny"; radius = 12;
+              }
+              gameObjects.bubbles.push(new Bubble(x, y, radius, dx, dy, size));
+            }
+          }
+          if (currentLevel % 5 === 0) {
+            addAchievement(`Milestone! Reached Level ${currentLevel}`);
+          }
+        }
+      }
+      function splitBubble(bubble, index) {
+        gameObjects.bubbles.splice(index, 1);
+        if (bubble.size === "large") {
+          gameObjects.bubbles.push(new Bubble(bubble.x, bubble.y, 30, 3 * difficultyFactor, -5 * difficultyFactor, "medium"));
+          gameObjects.bubbles.push(new Bubble(bubble.x, bubble.y, 30, -3 * difficultyFactor, -5 * difficultyFactor, "medium"));
+        } else if (bubble.size === "medium") {
+          gameObjects.bubbles.push(new Bubble(bubble.x, bubble.y, 20, 3 * difficultyFactor, -5 * difficultyFactor, "small"));
+          gameObjects.bubbles.push(new Bubble(bubble.x, bubble.y, 20, -3 * difficultyFactor, -5 * difficultyFactor, "small"));
+        }
+      }
+      function restartGame() {
+        stopEffectSounds();
+        gamePaused = false;
+        clearInterval(timerInterval);
+        cancelAnimationFrame(animationFrame);
+        // Reset background music and sound effects only on game restart.
+        if (bgMusicOn) {
+          bgMusic.pause();
+          bgMusic.currentTime = 0;
+          currentBgTrack = 0;
+          bgMusic.src = bgMusicPlaylist[currentBgTrack];
+          bgMusic.loop = true;
+          bgMusic.play();
+        }
+        specialSound.pause(); specialSound.currentTime = 0;
+        deathSound.pause(); deathSound.currentTime = 0;
+        bubbleSplitSound.pause(); bubbleSplitSound.currentTime = 0;
+        audioPop.pause(); audioPop.currentTime = 0;
+        audioPowerup.pause(); audioPowerup.currentTime = 0;
+
+        initGame();
+        document.getElementById("gameCanvas").style.display = "block";
+        document.getElementById("gameOverScreen").style.display = "none";
+        startGameTimer();
+        updateGameState(GameState.PLAYING);
+      }
+      function endGame() {
+        stopEffectSounds();
+        clearInterval(timerInterval);
+        cancelAnimationFrame(animationFrame);
+        document.getElementById("gameCanvas").style.display = "none";
+        document.getElementById("gameOverScreen").style.display = "block";
+        document.getElementById("finalScore").innerText =
+          `Player: ${username} | Score: ${score} | Rounds: ${level} | Time: ${gameTime}s | XP: ${xp} | Level: ${xpLevel}`;
+        updateLeaderboard();
+        populateLeaderboard();
+        populateGameOverLeaderboard();
+        if (autoFireActive) {
+          clearInterval(autoFireInterval);
+          autoFireActive = false;
+        }
+        updateGameState(GameState.GAME_OVER);
+      }
+      function updateLeaderboard() {
+        let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+        const exists = leaderboard.some(entry => entry.username.toLowerCase() === username.toLowerCase());
+        if (!exists) {
+          leaderboard.push({
+            username: username,
+            score: score,
+            rounds: level,
+            timeSurvived: gameTime,
+            xp: xp,
+            xpLevel: xpLevel,
+            bonusOpportunities: bonusGameOpportunities,
+            coins: coinsCollected
+          });
+        } else {
+          leaderboard = leaderboard.map(entry => {
+            if (entry.username.toLowerCase() === username.toLowerCase()) {
+              return {
+                username: username,
+                score: Math.max(entry.score, score),
+                rounds: Math.max(entry.rounds, level),
+                timeSurvived: Math.max(entry.timeSurvived || 0, gameTime),
+                xp: Math.max(entry.xp || 0, xp),
+                xpLevel: Math.max(entry.xpLevel || 1, xpLevel),
+                bonusOpportunities: (entry.bonusOpportunities || 0) + bonusGameOpportunities,
+                coins: (entry.coins || 0) + coinsCollected
+              };
+            }
+            return entry;
+          });
+        }
+        leaderboard.sort((a, b) => {
+          const aScore = (a.rounds * 0.6) + (a.score * 0.0003) + (a.timeSurvived * 0.001);
+          const bScore = (b.rounds * 0.6) + (b.score * 0.0003) + (b.timeSurvived * 0.001);
+          return bScore - aScore;
+        });
+        leaderboard = leaderboard.slice(0, 10);
+        localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+      }
+      function populateLeaderboard() {
+        const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+        const leftList = document.getElementById("leaderboardContent");
+        leftList.innerHTML = "<h3>Leaderboard</h3>";
+        leaderboard.forEach((entry, index) => {
+          const div = document.createElement("div");
+          div.textContent = `${index+1}. ${entry.username} | Rounds: ${entry.rounds} | Score: ${entry.score} | Time: ${entry.timeSurvived}s`;
+          leftList.appendChild(div);
+        });
+      }
+      function populateGameOverLeaderboard() {
+        const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+        const goList = document.getElementById("gameOverLeaderboard");
+        goList.innerHTML = "";
+        leaderboard.forEach(entry => {
+          const li = document.createElement("li");
+          li.textContent = `${entry.username} | Rounds: ${entry.rounds} | Score: ${entry.score} | Time: ${entry.timeSurvived}s`;
+          goList.appendChild(li);
+        });
+      }
+      function addAchievement(message) {
+        achievements.push(message);
+        updateAchievements();
+        setTimeout(() => { achievements.shift(); updateAchievements(); }, 5000);
+      }
+      function updateAchievements() {
+        const achDiv = document.getElementById("achievementLog");
+        achDiv.innerHTML = "<h4>Achievements</h4>";
+        achievements.forEach(msg => {
+          const p = document.createElement("p");
+          p.innerText = msg;
+          achDiv.appendChild(p);
+        });
+      }
+
+      // ----------------- Enhanced Cutscene Function -----------------
+      // Supports multiple slides (each with an image and text) and uses a fade-out transition.
+      function showCutscene(type, callback) {
+        const cutsceneDiv = document.getElementById('cutscene');
+        const cutsceneContent = document.getElementById('cutsceneContent');
+        cutsceneDiv.style.display = 'flex';
+
+        // Define slide arrays for start and boss cutscenes.
+        let slides = [];
+        if (type === 'start') {
+          slides = [
+            { img: "assets/images/start_cutscene.png", text: "Yumi awakens in a world of floating bubbles..." },
+            { img: "assets/images/start_cutscene.png", text: "Her destiny is to pop them all and restore balance!" }
+          ];
+        } else if (type === 'boss') {
+          slides = [
+            { img: "assets/images/boss_cutscene.png", text: "The Omega Bubble emerges from the depths..." },
+            { img: "assets/images/boss_cutscene.png", text: "Prepare for the ultimate challenge!" }
+          ];
+        }
+
+        let currentSlide = 0;
+        function displaySlide(index) {
+          if (index >= slides.length) {
+            // All slides shown; hide cutscene and call callback.
+            cutsceneDiv.style.display = 'none';
+            if (callback) callback();
+            return;
+          }
+          const slide = slides[index];
+          cutsceneContent.innerHTML = `<div class="cutscene-slide">
+                                          <img src="${slide.img}" alt="Cutscene Image">
+                                          <p>${slide.text}</p>
+                                       </div>`;
+          // Display slide for 3 seconds, then fade out.
+          setTimeout(() => {
+            const slideElem = cutsceneContent.querySelector('.cutscene-slide');
+            slideElem.classList.add('fade-out');
+            // After fade-out transition (1s), move to next slide.
+            setTimeout(() => {
+              displaySlide(index + 1);
+            }, 1000);
+          }, 3000);
+        }
+        displaySlide(currentSlide);
+
+        // Allow skip.
+        document.getElementById('skipCutscene').onclick = () => {
+          cutsceneDiv.style.display = 'none';
+          if (callback) callback();
+        };
+      }
+
+      let rightPressed = false, leftPressed = false;
+      function gameLoop() {
+        if (gamePaused || currentState !== GameState.PLAYING) return;
+        const playArea = getPlayArea();
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.imageSmoothingEnabled = true;
+        drawGameBackdrop(playArea);
+        drawBoundaries(playArea);
+        drawFloor(playArea);
+        drawPlayerStats();
+        if (rightPressed && gameObjects.paddle.x < playArea.x + playArea.width - gameObjects.paddle.width) {
+          gameObjects.paddle.x += gameObjects.paddle.speed * timeScale;
+        }
+        if (leftPressed && gameObjects.paddle.x > playArea.x) {
+          gameObjects.paddle.x -= gameObjects.paddle.speed * timeScale;
+        }
+        gameObjects.paddle.drawSprite(rightPressed || leftPressed);
+        for (let i = gameObjects.projectiles.length - 1; i >= 0; i--) {
+          const proj = gameObjects.projectiles[i];
+          proj.update();
+          if (proj.y + proj.height < playArea.y) {
+            gameObjects.projectiles.splice(i, 1);
+          } else {
+            proj.draw();
+          }
+        }
+        for (let i = gameObjects.bubbles.length - 1; i >= 0; i--) {
+          const bubble = gameObjects.bubbles[i];
+          bubble.update();
+          bubble.draw();
+          if (isCollidingCircleRect(bubble, gameObjects.paddle.getHitbox())) {
+            if (!shieldActive && !paddleInvulnerable) {
+              lives--; combo = 0;
+              createParticles(gameObjects.paddle.x + gameObjects.paddle.width / 2, gameObjects.paddle.y, "#ff0000");
+              if (sfxOn) audioPop.play();
+              paddleInvulnerable = true;
+              setTimeout(() => { paddleInvulnerable = false; }, HIT_COOLDOWN);
+              addAchievement("Ouch! You took damage.");
+            }
+            if (lives <= 0) {
+              endGame();
+              ctx.restore();
+              return;
+            }
+          }
+          for (let j = gameObjects.projectiles.length - 1; j >= 0; j--) {
+            const proj = gameObjects.projectiles[j];
+            const rect = { x: proj.x, y: proj.y, width: proj.width, height: proj.height };
+            if (isCollidingCircleRect(bubble, rect)) {
+              if (bubble instanceof BossBubble) {
+                bubble.health--;
+                if (bubble.health <= 0) {
+                  gameObjects.bubbles.splice(i, 1);
+                  addAchievement("Boss Defeated!");
+                  let scoreIncrement = 50 * combo;
+                  score += scoreIncrement;
+                  xp += scoreIncrement;
+                  checkLevelUp();
+                  gameObjects.explosions.push(new Explosion(bubble.x - 25, bubble.y - 25, "bubbleExplode", 8));
+                  gameObjects.explosions.push(new Explosion(bubble.x - 30, bubble.y - 30, "explosion11", 11));
+                  gameObjects.speechBubbles.push(new SpeechBubble(bubble.x, bubble.y - 50, "Noooo!"));
+                }
+                gameObjects.projectiles.splice(j, 1);
+                break;
+              } else {
+                gameObjects.projectiles.splice(j, 1);
+                combo++;
+                let scoreIncrement = 10 * combo * difficultyFactor;
+                score += scoreIncrement;
+                xp += scoreIncrement;
+                checkLevelUp();
+                if (bubble instanceof GoldenBubble) {
+                  score += 200 * difficultyFactor;
+                  xp += 200;
+                  checkLevelUp();
+                  for (let k = 0; k < 3; k++) { spawnDrop(bubble.x, bubble.y); }
+                  addAchievement("Golden Bubble Bonus!");
+                  bubbleSplitSound.play();
+                }
+                createParticles(bubble.x, bubble.y, "#00ff00");
+                if (sfxOn) audioPop.play();
+                const dropChance = 0.05 + (level * 0.03 * difficultyFactor);
+                if (Math.random() < dropChance) { spawnDrop(bubble.x, bubble.y); }
+                gameObjects.explosions.push(new Explosion(bubble.x - 25, bubble.y - 25, "bubbleExplode", 8));
+                gameObjects.explosions.push(new Explosion(bubble.x - 30, bubble.y - 30, "explosion11", 11));
+                splitBubble(bubble, i);
+                if (combo % 5 === 0) { addAchievement("Combo x" + combo + "!"); }
+                break;
+              }
+            }
+          }
+        }
+        for (let i = gameObjects.drops.length - 1; i >= 0; i--) {
+          const drop = gameObjects.drops[i];
+          drop.update();
+          drop.draw();
+          const dropRect = { x: drop.x, y: drop.y, width: drop.width, height: drop.height };
+          const paddleRect = gameObjects.paddle.getHitbox();
+          if (isCollidingRect(dropRect, paddleRect)) {
+            if (drop.type === "coins" || drop.type === "deathDrop") {
+              activateDrop(drop);
+            } else {
+              addToBackpack(drop);
+            }
+            itemLog.push(drop.type);
+            gameObjects.drops.splice(i, 1);
+            createParticles(drop.x, drop.y, "#ffff00", 25);
+            if (sfxOn) audioPowerup.play();
+          } else if (drop.y > playArea.y + playArea.height) {
+            gameObjects.drops.splice(i, 1);
+          }
+        }
+        for (let i = gameObjects.particles.length - 1; i >= 0; i--) {
+          const p = gameObjects.particles[i];
+          p.update();
+          p.draw();
+          if (p.life <= 0) { gameObjects.particles.splice(i, 1); }
+        }
+        for (let i = gameObjects.explosions.length - 1; i >= 0; i--) {
+          const exp = gameObjects.explosions[i];
+          exp.update();
+          exp.draw();
+          if (exp.isFinished()) { gameObjects.explosions.splice(i, 1); }
+        }
+        for (let i = gameObjects.speechBubbles.length - 1; i >= 0; i--) {
+          const bubble = gameObjects.speechBubbles[i];
+          bubble.draw();
+          if (Date.now() - bubble.startTime > bubble.duration) {
+            gameObjects.speechBubbles.splice(i, 1);
+          }
+        }
+        if (gameObjects.bubbles.length === 0 && !roundTransitionInProgress) {
+          startRoundTransition();
+        }
+        updateProfileBox();
+        ctx.restore();
+        animationFrame = requestAnimationFrame(gameLoop);
+      }
+      function shootProjectile() {
+        const player = gameObjects.paddle;
+        if (player) {
+          player.lastShotTime = Date.now();
+        }
+        const projImg = spritePNG("projectileAnim_1");
+        const centerX = player.x + player.width / 2 - (projImg.naturalWidth ? projImg.naturalWidth / 2 : 5);
+        const centerY = player.y + player.height / 2 - (projImg.naturalHeight ? projImg.naturalHeight / 2 : 5);
+        if (laserFireActive) {
+          gameObjects.projectiles.push(new GrappleLaserProjectile(centerX, centerY));
+        } else if (spreadShotActive) {
+          gameObjects.projectiles.push(new Projectile(centerX, centerY, -0.1));
+          gameObjects.projectiles.push(new Projectile(centerX, centerY, 0.1));
+        } else {
+          gameObjects.projectiles.push(new Projectile(centerX, centerY, 0));
+        }
+      }
+      document.addEventListener("keydown", function(e) {
+        if (e.key.toLowerCase() === controlRight || e.key === "ArrowRight") {
+          rightPressed = true;
+          if (gameObjects.paddle) { gameObjects.paddle.direction = "right"; }
+        }
+        else if (e.key.toLowerCase() === controlLeft || e.key === "ArrowLeft") {
+          leftPressed = true;
+          if (gameObjects.paddle) { gameObjects.paddle.direction = "left"; }
+        }
+        else if (e.key === controlShoot || e.key === " " || e.code === "Space") { shootProjectile(); }
+      });
+      document.addEventListener("keyup", function(e) {
+        if (e.key.toLowerCase() === controlRight || e.key === "ArrowRight") { rightPressed = false; }
+        else if (e.key.toLowerCase() === controlLeft || e.key === "ArrowLeft") { leftPressed = false; }
+      });
+      document.getElementById("gameCanvas").addEventListener("click", shootProjectile);
+      document.getElementById("gameCanvas").addEventListener("touchstart", function(e) {
+        e.preventDefault();
+        if (!gameObjects.paddle) return;
+        let touchX = e.touches[0].clientX;
+        let paddleCenter = gameObjects.paddle.x + gameObjects.paddle.width / 2;
+        if (touchX < paddleCenter) {
+          leftPressed = true;
+          rightPressed = false;
+          gameObjects.paddle.direction = "left";
+        } else {
+          rightPressed = true;
+          leftPressed = false;
+          gameObjects.paddle.direction = "right";
+        }
+      }, false);
+      document.getElementById("gameCanvas").addEventListener("touchend", function(e) {
+        leftPressed = false;
+        rightPressed = false;
+      }, false);
+      document.getElementById("fullScreenToggle").addEventListener("change", (e) => {
+        if (e.target.checked) {
+          if (document.documentElement.requestFullscreen) { document.documentElement.requestFullscreen(); }
+        } else {
+          if (document.exitFullscreen) { document.exitFullscreen(); }
+        }
+      });
+      document.getElementById("startButton").addEventListener("click", function () {
+        username = document.getElementById("usernameInput").value.trim();
+        const startError = document.getElementById("startError");
+        startError.innerText = "";
+        if (username === "") { startError.innerText = "Please enter a username."; return; }
+        const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+        const userRecord = leaderboard.find(entry => entry.username.toLowerCase() === username.toLowerCase());
+        if (userRecord) {
+          xp = userRecord.xp || 0;
+          xpLevel = userRecord.xpLevel || 1;
+          bonusGameOpportunities = userRecord.bonusOpportunities || 0;
+          coinsCollected = userRecord.coins || 0;
+        } else {
+          xp = 0;
+          xpLevel = 1;
+          bonusGameOpportunities = 0;
+          coinsCollected = 0;
+        }
+        updateBonusGameUI();
+        document.getElementById("homeProfileUsername").innerText = "Username: " + username;
+        document.getElementById("homeProfileLevel").innerText = "Level: " + xpLevel;
+        document.getElementById("homeProfileTopScore").innerText = "Top Score: 0";
+        document.getElementById("startScreen").style.display = "none";
+        updateGameState(GameState.CUTSCENE);
+        showCutscene('start', () => {
+          document.getElementById("mainContainer").style.display = "flex";
+          document.getElementById("gameCanvas").style.display = "block";
+          const overlay = document.getElementById("roundTransitionOverlay");
+          overlay.style.display = "none";
+          overlay.style.opacity = "0";
+          initGame();
+          updateCoinPanel();
+          if (bgMusicOn) bgMusic.play();
+          startGameTimer();
+          updateGameState(GameState.PLAYING);
+        });
+      });
+      document.getElementById("playBonusGameButtonHome").addEventListener("click", playBonusGame);
+      document.getElementById("restartButton").addEventListener("click", restartGame);
+      document.getElementById("restartGameButton").addEventListener("click", restartGame);
+      document.getElementById("homeButton").addEventListener("click", function () {
+        clearInterval(timerInterval);
+        cancelAnimationFrame(animationFrame);
+        document.getElementById("gameCanvas").style.display = "none";
+        document.getElementById("gameOverScreen").style.display = "none";
+        document.getElementById("startScreen").style.display = "flex";
+        updateGameState(GameState.START);
+      });
+      document.getElementById("pauseButton").addEventListener("click", () => {
+        gamePaused = !gamePaused;
+        document.getElementById("pauseButton").innerText = gamePaused ? "Resume" : "Pause";
+        if (!gamePaused && currentState === GameState.PLAYING) { gameLoop(); }
+        updateGameState(gamePaused ? GameState.PAUSED : GameState.PLAYING);
+      });
+      document.getElementById("settingsButton").addEventListener("click", () => {
+        document.getElementById("settingsOverlay").style.display = "block";
+      });
+      document.getElementById("closeSettings").addEventListener("click", () => {
+        document.getElementById("settingsOverlay").style.display = "none";
+        controlLeft = document.getElementById("keyLeft").value.toLowerCase();
+        controlRight = document.getElementById("keyRight").value.toLowerCase();
+        controlShoot = document.getElementById("keyShoot").value || " ";
+        bgMusic.volume = parseFloat(document.getElementById("bgVolume").value);
+        audioPop.volume = parseFloat(document.getElementById("sfxVolume").value);
+        audioPowerup.volume = parseFloat(document.getElementById("sfxVolume").value);
+      });
+      document.getElementById("bgMusicToggle").addEventListener("change", (e) => {
+        bgMusicOn = e.target.checked;
+        if (bgMusicOn) { bgMusic.play(); } else { bgMusic.pause(); }
+      });
+      document.getElementById("sfxToggle").addEventListener("change", (e) => { sfxOn = e.target.checked; });
+      document.getElementById("customMusic").addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            bgMusic.src = event.target.result;
+            if (bgMusicOn) { bgMusic.play(); }
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+      populateLeaderboard();
+      populateItemDirectory();
+      let leaderboardResetInterval = parseInt(document.getElementById("resetInterval").value, 10) * 60000;
+      let leaderboardResetTimer = null;
+      function resetLeaderboard() {
+        localStorage.removeItem("leaderboard");
+        populateLeaderboard();
+        populateGameOverLeaderboard();
+      }
+      function startLeaderboardResetTimer() {
+        leaderboardResetTimer = setInterval(resetLeaderboard, leaderboardResetInterval);
+      }
+      document.getElementById("resetInterval").addEventListener("change", function(e) {
+        if (leaderboardResetTimer) { clearInterval(leaderboardResetTimer); }
+        leaderboardResetInterval = parseInt(e.target.value, 10) * 60000;
+        startLeaderboardResetTimer();
+      });
+      startLeaderboardResetTimer();
+      function startGameTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+          if (!gamePaused && currentState === GameState.PLAYING) {
+            gameTime++;
+            updateProfileBox();
+            if (gameTime % 60 === 0 && gameTime > 0) {
+              addAchievement(`Survived ${gameTime / 60} minute${gameTime / 60 > 1 ? 's' : ''}!`);
+            }
+          }
+        }, 1000);
+      }
+      function startRoundTransition() {
+        roundTransitionInProgress = true;
+        let countdown = 3;
+        const overlay = document.getElementById("roundTransitionOverlay");
+        overlay.style.display = "flex";
+        requestAnimationFrame(() => {
+          overlay.style.opacity = "1";
+          overlay.innerText = `Next Round: ${currentDifficulty} in ${countdown}`;
+        });
+        const countdownInterval = setInterval(() => {
+          countdown--;
+          if (countdown > 0) {
+            overlay.innerText = `Next Round: ${currentDifficulty} in ${countdown}`;
+          } else {
+            clearInterval(countdownInterval);
+            overlay.style.opacity = "0";
+            setTimeout(() => {
+              overlay.style.display = "none";
+              roundTransitionInProgress = false;
+              level++;
+              spawnBubbles(level);
+            }, 500);
+          }
+        }, 1000);
+      }
+      function initGame() {
+        canvas = document.getElementById("gameCanvas");
+        ctx = canvas.getContext("2d");
+        ctx.imageSmoothingEnabled = true;
+        const playArea = getPlayArea();
+        const floorHeight = canvas.height * 0.05;
+        const idleImg = spritePNG("characterIdle_1");
+        const idleWidth = idleImg.naturalWidth ? Math.floor(idleImg.naturalWidth * 1.5) : 75;
+        const idleHeight = idleImg.naturalHeight ? Math.floor(idleImg.naturalHeight * 1.5) : 75;
+        gameObjects.paddle = new Player(
+          playArea.x + playArea.width / 2 - idleWidth / 2,
+          playArea.y + playArea.height - floorHeight - idleHeight
+        );
+        gameObjects.bubbles = [];
+        gameObjects.projectiles = [];
+        gameObjects.drops = [];
+        gameObjects.particles = [];
+        gameObjects.explosions = [];
+        gameObjects.speechBubbles = [];
+        score = 0; lives = 3; level = 1; combo = 0; gameTime = 0;
+        difficultyFactor = 1.0;
+        currentDifficulty = "Easy";
+        updateBonusGameUI();
+        achievements = [];
+        updateAchievements();
+        speedBoostActive = false; shieldActive = false; weaponBoostActive = false;
+        spreadShotActive = false; slowMotionActive = false; paddleInvulnerable = false;
+        timeScale = 1.0;
+        clearTimeout(speedBoostTimeout); clearTimeout(shieldTimeout); clearTimeout(weaponBoostTimeout);
+        clearTimeout(spreadShotTimeout); clearTimeout(slowMotionTimeout);
+        spawnBubbles(level);
+        rightPressed = false; leftPressed = false; shakeTime = 0; shakeIntensity = 0;
+        updateProfileBox();
+        updateDifficultyIndicator();
+        updateCoinPanel();
+      }
+
+      // ----------------- PLAYER AND SPRITE CLASSES -----------------
+      class Player {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.baseSpeed = 7;
+          this.speed = this.baseSpeed;
+          this.direction = "right";
+          this.lastShotTime = 0;
+          this.idleNoActionSprite = new IdleNoActionSprite(this);
+          this.idleShootingSprite = new IdleShootingSprite(this);
+          this.runningSprite = new RunningSprite(this);
+          this.runningShootingSprite = new RunningShootingSprite(this);
+          this.width = this.idleNoActionSprite.width;
+          this.height = this.idleNoActionSprite.height;
+        }
+        drawSprite(isRunning) {
+          const shooting = (Date.now() - this.lastShotTime < SHOOT_ANIMATION_DURATION);
+          if (isRunning) {
+            if (shooting) {
+              this.runningShootingSprite.draw();
+            } else {
+              this.runningSprite.draw();
+            }
+          } else {
+            if (shooting) {
+              this.idleShootingSprite.draw();
+            } else {
+              this.idleNoActionSprite.draw();
+            }
+          }
+        }
+        getHitbox() {
+          return {
+            x: this.x + 6,
+            y: this.y + 6,
+            width: this.width - 12,
+            height: this.height - 12
+          };
+        }
+      }
+      class Drop {
+        constructor(x, y, type, value = 0) {
+          this.x = x;
+          this.y = y;
+          this.type = type;
+          this.value = value;
+          const sp = sprite("drop_" + type);
+          this.width = sp ? sp.width : 30;
+          this.height = sp ? sp.height : 30;
+          this.speedY = 5 * difficultyFactor;
+          this.frame = 0;
+          this.maxFrames = 6;
+          this.frameDelay = 5;
+          this.frameDelayCounter = 0;
+        }
+        draw() {
+          this.frameDelayCounter++;
+          if (this.frameDelayCounter >= this.frameDelay) {
+            this.frame = (this.frame + 1) % this.maxFrames;
+            this.frameDelayCounter = 0;
+          }
+          const dropImg = spriteAnimation("drop_" + this.type, this.frame, this.maxFrames);
+          if (dropImg.naturalWidth) {
+            ctx.drawImage(dropImg, this.x, this.y, this.width, this.height);
+          } else {
+            ctx.font = "24px Arial";
+            let emoji;
+            switch(this.type) {
+              case "deathDrop": emoji = "💀"; break;
+              case "extraLife": emoji = "❤️"; break;
+              case "speedBoost": emoji = "💨"; break;
+              case "shieldBoost": emoji = "🛡️"; break;
+              case "coins": emoji = "💰"; break;
+              case "weapon": emoji = "🔫"; break;
+              case "slowMotion": emoji = "🐢"; break;
+              case "spreadShot": emoji = "✴️"; break;
+              case "clock": emoji = "⏰"; break;
+              case "ultimateBoost": emoji = "🌟"; break;
+              case "laserFire": emoji = "⚡"; break;
+              default: emoji = "❓"; break;
+            }
+            ctx.fillText(emoji, this.x, this.y + this.height);
+          }
+        }
+        update() { this.y += this.speedY * timeScale; }
+      }
+      function spawnDrop(x, y) {
+        let dropTypes = ["extraLife", "speedBoost", "shieldBoost", "coins", "weapon", "slowMotion", "spreadShot", "clock", "ultimateBoost", "laserFire"];
+        if (Math.random() < 0.03 * difficultyFactor) { dropTypes = ["deathDrop"]; }
+        const chosen = dropTypes[Math.floor(Math.random() * dropTypes.length)];
+        let value = chosen === "coins" ? Math.floor(Math.random() * 50 * difficultyFactor) + 1 : 0;
+        gameObjects.drops.push(new Drop(x, y, chosen, value));
+      }
+      function getItemDescription(item) {
+        switch (item) {
+          case "extraLife": return "❤️ Extra Life: Grants 1 additional health.";
+          case "speedBoost": return "💨 Speed Boost: Increases speed for 15 seconds.";
+          case "shieldBoost": return "🛡️ Shield Boost: Grants invulnerability for 10 seconds.";
+          case "coins": return "💰 Coins: Collect coins to increase your score.";
+          case "weapon": return "🔫 Weapon Upgrade: Enables auto-fire for 10 seconds.";
+          case "slowMotion": return "🐢 Slow Motion: Slows game time for 10 seconds.";
+          case "spreadShot": return "✴️ Spread Shot: Fires multiple projectiles for 10 seconds.";
+          case "clock": return "⏰ Clock: Adds 5 seconds to survival time.";
+          case "ultimateBoost": return "🌟 Ultimate Boost: Grants shield, auto fire, spread shot, and speed boost for 10 seconds.";
+          case "laserFire": return "⚡ Laser Fire: Activates grapple laser gun for 5 seconds.";
+          case "deathDrop": return "💀 Death Drop: Ends game instantly!";
+          default: return "";
+        }
+      }
+      function populateItemDirectory() {
+        const itemDir = document.getElementById("itemDirectoryList");
+        itemDir.innerHTML = "";
+        const items = ["extraLife", "speedBoost", "shieldBoost", "coins", "weapon", "slowMotion", "spreadShot", "clock", "ultimateBoost", "deathDrop", "laserFire"];
+        items.forEach(item => {
+          const div = document.createElement("div");
+          div.textContent = getItemDescription(item);
+          itemDir.appendChild(div);
+        });
+      }
+      function addToBackpack(drop) {
+        let totalItems = 0;
+        for (let type in backpackInventory) { totalItems += backpackInventory[type]; }
+        if (totalItems >= 9) {
+          showGameMessage("Backpack is full!");
+          return;
+        }
+        if (backpackInventory[drop.type]) {
+          if (backpackInventory[drop.type] < 3) {
+            backpackInventory[drop.type]++;
+          } else {
+            showGameMessage(`${drop.type} slot is full!`);
+          }
+        } else {
+          backpackInventory[drop.type] = 1;
+        }
+        updateBackpackUI();
+      }
+      function getItemEmoji(itemType) {
+        switch(itemType) {
+          case "extraLife": return "❤️";
+          case "speedBoost": return "💨";
+          case "shieldBoost": return "🛡️";
+          case "weapon": return "🔫";
+          case "slowMotion": return "🐢";
+          case "spreadShot": return "✴️";
+          case "clock": return "⏰";
+          case "ultimateBoost": return "🌟";
+          case "laserFire": return "⚡";
+          default: return "";
+        }
+      }
+      function updateBackpackUI() {
+        const grid = document.getElementById("backpackGrid");
+        grid.innerHTML = "";
+        let items = [];
+        for (let type in backpackInventory) {
+          items.push({ type: type, count: backpackInventory[type] });
+        }
+        for (let i = 0; i < 9; i++) {
+          const slot = document.createElement("div");
+          slot.className = "backpack-slot";
+          if (items[i]) {
+            slot.dataset.itemType = items[i].type;
+            const emoji = getItemEmoji(items[i].type);
+            slot.innerText = emoji + (items[i].count > 1 ? " " + items[i].count : "");
+            slot.addEventListener("click", function() {
+              useBackpackItem(items[i].type);
+            });
+          }
+          grid.appendChild(slot);
+        }
+      }
+      function useBackpackItem(itemType) {
+        if (backpackInventory[itemType] && backpackInventory[itemType] > 0) {
+          activateBackpackItem(itemType);
+          backpackInventory[itemType]--;
+          if (backpackInventory[itemType] <= 0) { delete backpackInventory[itemType]; }
+          updateBackpackUI();
+        }
+      }
+      function activateBackpackItem(itemType) {
+        switch (itemType) {
+          case "extraLife":
+            if (lives < MAX_LIVES) { lives++; showGameMessage("Extra Life Activated!"); }
+            break;
+          case "speedBoost":
+            speedBoostActive = true;
+            gameObjects.paddle.speed = gameObjects.paddle.baseSpeed + 5;
+            clearTimeout(speedBoostTimeout);
+            speedBoostTimeout = setTimeout(() => {
+              speedBoostActive = false;
+              gameObjects.paddle.speed = gameObjects.paddle.baseSpeed;
+            }, 15000);
+            showGameMessage("Speed Boost Activated!");
+            break;
+          case "shieldBoost":
+            shieldActive = true;
+            clearTimeout(shieldTimeout);
+            shieldTimeout = setTimeout(() => { shieldActive = false; }, 8000);
+            showGameMessage("Shield Activated!");
+            break;
+          case "weapon":
+            weaponBoostActive = true;
+            clearTimeout(weaponBoostTimeout);
+            weaponBoostTimeout = setTimeout(() => {
+              weaponBoostActive = false;
+              autoFireActive = false;
+              clearInterval(autoFireInterval);
+            }, AUTO_FIRE_DURATION);
+            if (!autoFireActive) {
+              autoFireActive = true;
+              autoFireInterval = setInterval(shootProjectile, AUTO_FIRE_INTERVAL_MS);
+            }
+            showGameMessage("Weapon Upgrade Activated!");
+            break;
+          case "slowMotion":
+            slowMotionActive = true;
+            timeScale = 0.5;
+            clearTimeout(slowMotionTimeout);
+            slowMotionTimeout = setTimeout(() => { slowMotionActive = false; timeScale = 1.0; }, 10000);
+            showGameMessage("Slow Motion Activated!");
+            break;
+          case "spreadShot":
+            spreadShotActive = true;
+            clearTimeout(spreadShotTimeout);
+            spreadShotTimeout = setTimeout(() => { spreadShotActive = false; }, 8000);
+            showGameMessage("Spread Shot Activated!");
+            break;
+          case "clock":
+            gameTime += 5;
+            showGameMessage("Extra Time Activated!");
+            break;
+          case "ultimateBoost":
+            shieldActive = true;
+            speedBoostActive = true;
+            weaponBoostActive = true;
+            spreadShotActive = true;
+            clearTimeout(shieldTimeout);
+            shieldTimeout = setTimeout(() => { shieldActive = false; }, 10000);
+            clearTimeout(speedBoostTimeout);
+            speedBoostTimeout = setTimeout(() => {
+              speedBoostActive = false;
+              gameObjects.paddle.speed = gameObjects.paddle.baseSpeed;
+            }, 10000);
+            clearTimeout(weaponBoostTimeout);
+            weaponBoostTimeout = setTimeout(() => {
+              weaponBoostActive = false;
+              autoFireActive = false;
+              clearInterval(autoFireInterval);
+            }, 10000);
+            clearTimeout(spreadShotTimeout);
+            spreadShotTimeout = setTimeout(() => { spreadShotActive = false; }, 10000);
+            showGameMessage("Ultimate Boost Activated!");
+            break;
+          case "laserFire":
+            laserFireActive = true;
+            clearTimeout(laserFireTimeout);
+            laserFireTimeout = setTimeout(() => { laserFireActive = false; }, 5000);
+            showGameMessage("Grapple Laser Activated!");
+            break;
+          default:
+            break;
+        }
+      }
+      class Explosion {
+        constructor(x, y, assetBase, maxFrames, frameDuration = 4) {
+          this.x = x;
+          this.y = y;
+          this.assetBase = assetBase;
+          this.maxFrames = maxFrames;
+          this.frameDuration = frameDuration;
+          this.currentFrame = 0;
+          this.frameCount = 0;
+        }
+        update() {
+          this.frameCount++;
+          if (this.frameCount >= this.frameDuration) {
+            this.currentFrame++;
+            this.frameCount = 0;
+          }
+        }
+        draw() {
+          if (this.currentFrame < this.maxFrames) {
+            const img = spriteAnimation(this.assetBase, this.currentFrame, this.maxFrames);
+            if (img.naturalWidth) { ctx.drawImage(img, this.x, this.y); }
+          }
+        }
+        isFinished() { return this.currentFrame >= this.maxFrames; }
+      }
+      class Particle {
+        constructor(x, y, color) {
+          this.x = x;
+          this.y = y;
+          this.radius = Math.random() * 3 + 2;
+          this.dx = (Math.random() - 0.5) * 4 * difficultyFactor;
+          this.dy = (Math.random() - 0.5) * 4 * difficultyFactor;
+          this.alpha = 1.0;
+          this.color = color;
+          this.life = 60;
+        }
+        update() {
+          this.x += this.dx * timeScale;
+          this.y += this.dy * timeScale;
+          this.life--;
+          this.alpha = this.life / 60;
+        }
+        draw() {
+          ctx.save();
+          ctx.globalAlpha = this.alpha;
+          ctx.beginPath();
+          ctx.fillStyle = this.color;
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.closePath();
+          ctx.restore();
+        }
+      }
+      function createParticles(x, y, color, count = 20) {
+        for (let i = 0; i < count; i++) {
+          gameObjects.particles.push(new Particle(x, y, color));
+        }
+      }
+    });
+    </script>
+</body>
+</html>
